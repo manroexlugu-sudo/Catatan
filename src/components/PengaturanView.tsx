@@ -41,9 +41,12 @@ export const PengaturanView: React.FC<PengaturanViewProps> = ({
   // Restore file input ref
   const restoreFileRef = React.useRef<HTMLInputElement>(null);
   const [confirmRestoreOpen, setConfirmRestoreOpen] = useState<boolean>(false);
-  const [pendingArchive, setPendingArchive] = useState<any>(null);
-  const [gitRepoUrl, setGitRepoUrl] = useState<string>('');
-  const [gitToken, setGitToken] = useState<string>('');
+  const [gitRepoUrl, setGitRepoUrl] = useState<string>(() => {
+    return localStorage.getItem('saved_git_repo') || 'https://github.com/manroexlugu-sudo/Catatan';
+  });
+  const [gitToken, setGitToken] = useState<string>(() => {
+    return localStorage.getItem('saved_git_token') || '';
+  });
   const [isPushingGit, setIsPushingGit] = useState<boolean>(false);
   const [gitPushResult, setGitPushResult] = useState<{ actionsUrl: string; releasesUrl: string } | null>(null);
 
@@ -52,6 +55,12 @@ export const PengaturanView: React.FC<PengaturanViewProps> = ({
       setMessage({ text: 'Masukkan URL Repositori dan GitHub Token Anda.', type: 'error' });
       return;
     }
+    // Save to local storage for convenience
+    try {
+      localStorage.setItem('saved_git_repo', gitRepoUrl.trim());
+      localStorage.setItem('saved_git_token', gitToken.trim());
+    } catch {}
+
     setIsPushingGit(true);
     setMessage(null);
     try {
@@ -64,7 +73,7 @@ export const PengaturanView: React.FC<PengaturanViewProps> = ({
       if (!res.ok) throw new Error(data.error || 'Gagal mengirim ke GitHub');
       setGitPushResult(data);
       setMessage({
-        text: 'Seluruh berkas & folder berhasil terkirim ke GitHub! GitHub Actions sekarang sedang membangun APK.',
+        text: 'Perbaikan workflow & seluruh folder berhasil dikirim ke GitHub! GitHub Actions sekarang sedang membangun APK.',
         type: 'success',
       });
     } catch (err: any) {
